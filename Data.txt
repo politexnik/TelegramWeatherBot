@@ -1,0 +1,4 @@
+Telegram Bot
+name: WeatherPolitexnikBot
+username: WeatherPolitexnikBot
+token: 734570323:AAEPEakF_UUoonwl6oib6QZjl0LAbZKerr4
