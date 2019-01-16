@@ -7,13 +7,15 @@ import org.openweathermap.api.model.currentweather.CurrentWeather;
 import org.openweathermap.api.model.forecast.ForecastInformation;
 import org.openweathermap.api.model.forecast.daily.DailyForecast;
 import org.openweathermap.api.model.forecast.hourly.HourlyForecast;
-import org.openweathermap.api.query.*;
+import org.openweathermap.api.query.Language;
+import org.openweathermap.api.query.QueryBuilderPicker;
+import org.openweathermap.api.query.UnitFormat;
 import org.openweathermap.api.query.currentweather.CurrentWeatherOneLocationQuery;
 import org.openweathermap.api.query.forecast.hourly.ByGeographicCoordinates;
 
-public class WeatherLocation {
+public class WeatherLocationShort {
     private static final String API_KEY = "8593aa46effd9bf8dc172c21c1e9121b";
-    private static final DataWeatherClient client = new UrlConnectionDataWeatherClient(API_KEY);
+
     public static String getWeatherByLocation(double lat, double lon, TypeForecast typeForecast){
         switch (typeForecast) {
             case CURRENT:
@@ -28,6 +30,7 @@ public class WeatherLocation {
     }
 
     public static String getCurrentWeatherByLocation(double lat, double lon) {
+        DataWeatherClient client = new UrlConnectionDataWeatherClient(API_KEY);
         CurrentWeatherOneLocationQuery currentWeatherOneLocationQuery = QueryBuilderPicker.pick()
                 .currentWeather()
                 .oneLocation()
@@ -40,6 +43,7 @@ public class WeatherLocation {
     }
 
     private static String getDailyWeatherByLocation(double lat, double lon) {
+        DataWeatherClient client = new UrlConnectionDataWeatherClient(API_KEY);
         org.openweathermap.api.query.forecast.daily.ByGeographicCoordinates byGeographicCoordinates =
                 QueryBuilderPicker.pick()
                         .forecast()                                         // get forecast
@@ -53,8 +57,8 @@ public class WeatherLocation {
     }
 
     private static String getWeatherHourlyByLocation(double lat, double lon) {
-        ByGeographicCoordinates byGeographicCoordinates =
-        QueryBuilderPicker.pick()
+        DataWeatherClient client = new UrlConnectionDataWeatherClient(API_KEY);
+        ByGeographicCoordinates byGeographicCoordinates = QueryBuilderPicker.pick()
                 .forecast()                                         // get forecast
                 .hourly()                                           // it should be hourly forecast
                 .byGeographicCoordinates(new Coordinate(String.valueOf(lon), String.valueOf(lat)))

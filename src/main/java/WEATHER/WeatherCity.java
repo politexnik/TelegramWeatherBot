@@ -10,10 +10,15 @@ import org.openweathermap.api.query.*;
 import org.openweathermap.api.query.currentweather.CurrentWeatherOneLocationQuery;
 import org.openweathermap.api.query.forecast.hourly.ByCityName;
 
+/**
+ * Класс прогноза погоды
+ */
+
 public class WeatherCity {
     private static final String API_KEY = "8593aa46effd9bf8dc172c21c1e9121b";
+    private static final DataWeatherClient client = new UrlConnectionDataWeatherClient(API_KEY);
     public static String getWeatherByCity(String cityName, TypeForecast typeForecast) {
-
+        //получаем погоду по выбраному методу
         switch (typeForecast) {
             case CURRENT:
                 return getCurrentWeatherByCity(cityName);
@@ -26,8 +31,8 @@ public class WeatherCity {
         }
     }
 
+    //прогноз текущей погоды
     public static String getCurrentWeatherByCity(String cityName){
-        DataWeatherClient client = new UrlConnectionDataWeatherClient(API_KEY);
         CurrentWeatherOneLocationQuery currentWeatherOneLocationQuery = QueryBuilderPicker.pick()
                 .currentWeather()                   // get current weather
                 .oneLocation()                      // for one location
@@ -41,9 +46,8 @@ public class WeatherCity {
         CurrentWeather currentWeather = client.getCurrentWeather(currentWeatherOneLocationQuery);
         return PrintWeather.adaptedPrint(currentWeather);
     }
-
+    //прогноз погоды по часам
     public static String getWeatherHourlyByCity(String cityName){
-        DataWeatherClient client = new UrlConnectionDataWeatherClient(API_KEY);
         ByCityName byCityNameForecast = QueryBuilderPicker.pick()
                 .forecast()                                         // get forecast
                 .hourly()                                           // it should be hourly forecast
@@ -54,21 +58,21 @@ public class WeatherCity {
                 .count(5)                                           // limit results to 5 forecasts
                 .build();
         ForecastInformation<HourlyForecast> forecastInformation = client.getForecastInformation(byCityNameForecast);
-        return PrintWeather.adaptedPrint(forecastInformation, new HourlyForecast());
+        return PrintWeather.adaptedPrint(forecastInformation);
     }
 
+    //прогноз погоды по дням
     public static String getDailyWeatherByCity(String cityName){
-        DataWeatherClient client = new UrlConnectionDataWeatherClient(API_KEY);
         org.openweathermap.api.query.forecast.daily.ByCityName byCityNameForecast =
                 QueryBuilderPicker.pick()
                         .forecast()                                         // get forecast
-                        .daily()                                            // it should be dailt
+                        .daily()                                            // it should be daily
                         .byCityName(cityName)                              // for Kharkiv city
                         .countryCode("RU")                                  // in Ukraine
                         .unitFormat(UnitFormat.METRIC)                      // in Metric units
                         .language(Language.RUSSIAN)                         // in English
                         .build();
         ForecastInformation<DailyForecast> forecastInformation = client.getForecastInformation(byCityNameForecast);
-        return PrintWeather.adaptedPrint(forecastInformation, new DailyForecast());
+        return PrintWeather.adaptedPrint(forecastInformation);
     }
 }
