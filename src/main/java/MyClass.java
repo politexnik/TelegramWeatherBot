@@ -8,7 +8,7 @@ public class MyClass {
         TelegramBotsApi botsApi = new TelegramBotsApi();
 
         try {
-            botsApi.registerBot(new WeatherBot());
+            botsApi.registerBot(new Bot());
         } catch (TelegramApiRequestException e) {
             e.printStackTrace();
         }

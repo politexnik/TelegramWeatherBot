@@ -1,5 +1,4 @@
-import WEATHER.WeatherCity;
-import WEATHER.WeatherLocation;
+import WEATHER.Weather;
 import WEATHER.TypeForecast;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -14,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class WeatherBot extends TelegramLongPollingBot {
+public class Bot extends TelegramLongPollingBot {
     private TypeForecast typeForecast = TypeForecast.CURRENT;
 
     //Мапа для установки типа погоды
@@ -35,13 +34,13 @@ public class WeatherBot extends TelegramLongPollingBot {
                 if (message.startsWith("\\")) {
                     typeForecast = typeForecastMap.get(message.toLowerCase());
                 } else {
-                    String returnWeather = WeatherCity.getWeatherByCity(message, typeForecast);
+                    String returnWeather = Weather.getWeather(message, typeForecast);
                     sendMsg(update.getMessage().getChatId().toString(), returnWeather);
                 }
             } else if (update.getMessage().hasLocation()) {
                 double lat = update.getMessage().getLocation().getLatitude();
                 double lon = update.getMessage().getLocation().getLongitude();
-                String returnWeather = WeatherLocation.getWeatherByLocation(lat, lon, typeForecast);
+                String returnWeather = Weather.getWeather(update.getMessage().getLocation(), typeForecast);
                 sendMsg(update.getMessage().getChatId().toString(), returnWeather);
             }
         }
