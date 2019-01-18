@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="api-common-1.2">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/openWeather/api-common-1.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/openWeather/api-core-1.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/openWeather/api-model-1.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/openWeather/api-query-1.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

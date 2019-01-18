@@ -2,8 +2,11 @@ import WEATHER.Weather;
 import WEATHER.TypeForecast;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -28,22 +31,14 @@ public class Bot extends TelegramLongPollingBot {
 
     public void onUpdateReceived(Update update) {
         if (update.hasMessage()){  //проверка на сообщения
-            if (update.getMessage().hasText()) {
-                String message = update.getMessage().getText();
-                //устанавливаем тип прогноза
-                if (message.startsWith("\\")) {
-                    typeForecast = typeForecastMap.get(message.toLowerCase());
-                } else {
-                    String returnWeather = Weather.getWeather(message, typeForecast);
-                    sendMsg(update.getMessage().getChatId().toString(), returnWeather);
-                }
-            } else if (update.getMessage().hasLocation()) {
-                double lat = update.getMessage().getLocation().getLatitude();
-                double lon = update.getMessage().getLocation().getLongitude();
-                String returnWeather = Weather.getWeather(update.getMessage().getLocation(), typeForecast);
-                sendMsg(update.getMessage().getChatId().toString(), returnWeather);
+            new Thread(new messageHandle(update.getMessage())).start();
+        } else if(update.hasCallbackQuery()){
+            String query = update.getCallbackQuery().getData();
+            if (query.startsWith("\\")) {
+                typeForecast = typeForecastMap.get(query.toLowerCase());
             }
         }
+
     }
 
     /**
@@ -55,6 +50,7 @@ public class Bot extends TelegramLongPollingBot {
 
     public synchronized void sendMsg(String chatId, String s) {
         SendMessage sendMessage = new SendMessage();
+        setButtons(sendMessage);
         sendMessage.enableMarkdown(true);
         sendMessage.setChatId(chatId);
         sendMessage.setText(s);
@@ -75,12 +71,48 @@ public class Bot extends TelegramLongPollingBot {
 
         List<KeyboardRow> keyboardRowList = new ArrayList<KeyboardRow>();
         KeyboardRow keyboardFirstRow = new KeyboardRow();
-        keyboardFirstRow.add(new KeyboardButton("Cейчас"));
-        keyboardFirstRow.add(new KeyboardButton("24 часа"));
-        keyboardFirstRow.add(new KeyboardButton("3 дня"));
+        keyboardFirstRow.add(new KeyboardButton("\\start"));
+        keyboardFirstRow.add(new KeyboardButton("\\help"));
+        keyboardFirstRow.add(new KeyboardButton("\\setup"));
         keyboardRowList.add(keyboardFirstRow);
         replyKeyboardMarkup.setKeyboard(keyboardRowList);
     }
+
+    private void setInline(){
+        List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
+        List<InlineKeyboardButton> buttons1 = new ArrayList<>();
+        buttons1.add(new InlineKeyboardButton().setText("Сейчас").setCallbackData("\\current"));
+        buttons1.add(new InlineKeyboardButton().setText("24ч").setCallbackData("\\hourly"));
+        buttons1.add(new InlineKeyboardButton().setText("5 дней").setCallbackData("\\daily"));
+        buttons.add(buttons1);
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.setKeyboard(buttons);
+    }
+
+    private class messageHandle implements Runnable{
+        Message message;
+        public messageHandle(Message message){
+            this.message = message;
+        }
+
+        @Override
+        public void run() {
+            if (message.hasText()) {
+                String messageString = message.getText();
+                    switch (messageString) {
+                        case "\\setup":
+
+
+                    }
+                    String returnWeather = Weather.getWeather(messageString, typeForecast);
+                    sendMsg(message.getChatId().toString(), returnWeather);
+            } else if (message.hasLocation()) {
+                String returnWeather = Weather.getWeather(message.getLocation(), typeForecast);
+                sendMsg(message.getChatId().toString(), returnWeather);
+            }
+        }
+    }
+
 
     public String getBotUsername() {
         return "WeatherPolitexnikBot";
