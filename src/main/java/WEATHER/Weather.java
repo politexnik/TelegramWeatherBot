@@ -29,23 +29,21 @@ import java.util.ArrayList;
 public class Weather {
     private static final String API_KEY = "8593aa46effd9bf8dc172c21c1e9121b";
     private static final DataWeatherClient client = new UrlConnectionDataWeatherClient(API_KEY);
-    public static String getWeather(Object cityNameOrLocation, TypeForecast typeForecast) {
-        //получаем погоду по выбраному методу и городу либо локации
-        if (cityNameOrLocation instanceof String) {
+    public static String getWeather(String cityName, TypeForecast typeForecast) {
+        switch (typeForecast) {
+            case CURRENT:
+                return getCurrentWeather(cityName);
+            case HOURLY:
+                return getHourlyWeather(cityName);
+            case DAILY:
+                return getDailyWeather(cityName);
+            default:
+                return null;
+        }
+    }
 
-            String cityName = (String) cityNameOrLocation;
-            switch (typeForecast) {
-                case CURRENT:
-                    return getCurrentWeather(cityName);
-                case HOURLY:
-                    return getHourlyWeather(cityName);
-                case DAILY:
-                    return getDailyWeather(cityName);
-                default:
-                    return null;
-            }
-        } else if (cityNameOrLocation instanceof Location) {
-            Location location = (Location) cityNameOrLocation;
+    public static String getWeather(Location location, TypeForecast typeForecast) {
+        //получаем погоду по выбраному методу и городу либо локации
             switch (typeForecast) {
                 case CURRENT:
                     return getCurrentWeather(location);
@@ -56,7 +54,6 @@ public class Weather {
                 default:
                     return null;
             }
-        } else return null;
     }
 
     //прогноз текущей погоды
@@ -123,8 +120,8 @@ public class Weather {
         hourlyModel.setCoordinatesLatitude(jCoord.getDouble("lat"));
         hourlyModel.setCoordinatesLongitude(jCoord.getDouble("lon"));
         hourlyModel.setPointsNumber((byte)jObject.getInt("cnt"));
-        hourlyModel.setWeatherPointList(new ArrayList<WeatherPoint>(hourlyModel.getPointsNumber()));
-        //List<WeatherPoint> weatherPointList = new ArrayList<WeatherPoint>(hourlyModel.getPointsNumber());
+        hourlyModel.setWeatherPointList(new ArrayList<>(hourlyModel.getPointsNumber()));
+
         JSONArray jsonArray = jObject.getJSONArray("list");
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject obj = jsonArray.getJSONObject(i);

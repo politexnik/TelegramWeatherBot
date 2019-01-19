@@ -1,7 +1,10 @@
+package BOT;
+
 import WEATHER.Weather;
 import WEATHER.TypeForecast;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -17,12 +20,14 @@ import java.util.List;
 import java.util.Map;
 
 public class Bot extends TelegramLongPollingBot {
-    private TypeForecast typeForecast = TypeForecast.CURRENT;
+    TypeForecast typeForecast = TypeForecast.CURRENT;
+    String lastTown;
 
     //Мапа для установки типа погоды
-    private static Map<String, TypeForecast> typeForecastMap;
+    static Map<String, TypeForecast> typeForecastMap;
+
     static {
-        typeForecastMap = new HashMap<String, TypeForecast>();
+        typeForecastMap = new HashMap<>();
         typeForecastMap.put("\\current", TypeForecast.CURRENT);
         typeForecastMap.put("\\hourly", TypeForecast.HOURLY);
         typeForecastMap.put("\\daily", TypeForecast.DAILY);
@@ -30,13 +35,11 @@ public class Bot extends TelegramLongPollingBot {
 
 
     public void onUpdateReceived(Update update) {
-        if (update.hasMessage()){  //проверка на сообщения
-            new Thread(new messageHandle(update.getMessage())).start();
-        } else if(update.hasCallbackQuery()){
-            String query = update.getCallbackQuery().getData();
-            if (query.startsWith("\\")) {
-                typeForecast = typeForecastMap.get(query.toLowerCase());
-            }
+
+        if (update.hasMessage()) {  //проверка на сообщения
+            new Thread(new MessageHandler(this, update.getMessage())).start();
+        } else if (update.hasCallbackQuery()) {
+            new Thread(new CallbackQueryHandler(this, update.getCallbackQuery())).start();
         }
 
     }
@@ -45,40 +48,38 @@ public class Bot extends TelegramLongPollingBot {
      * Метод для настройки сообщения и его отправки.
      *
      * @param chatId id чата
-     * @param s      Строка, которую необходимот отправить в качестве сообщения.
+     * @param outString      Строка, которую необходимот отправить в качестве сообщения.
      */
 
-    public synchronized void sendMsg(String chatId, String s) {
-        SendMessage sendMessage = new SendMessage();
-        setButtons(sendMessage);
+    public synchronized void sendMsg(SendMessage sendMessage, String chatId, String outString) {
         sendMessage.enableMarkdown(true);
         sendMessage.setChatId(chatId);
-        sendMessage.setText(s);
+        sendMessage.setText(outString);
         try {
-//            setButtons(sendMessage);
             execute(sendMessage);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
     }
 
-    public void setButtons(SendMessage sendMessage) {
+    void setButtons(SendMessage sendMessage) {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         sendMessage.setReplyMarkup(replyKeyboardMarkup);
         replyKeyboardMarkup.setSelective(true);
         replyKeyboardMarkup.setResizeKeyboard(true);
-        replyKeyboardMarkup.setOneTimeKeyboard(false);
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
 
-        List<KeyboardRow> keyboardRowList = new ArrayList<KeyboardRow>();
+        List<KeyboardRow> keyboardRowList = new ArrayList<>();
         KeyboardRow keyboardFirstRow = new KeyboardRow();
         keyboardFirstRow.add(new KeyboardButton("\\start"));
         keyboardFirstRow.add(new KeyboardButton("\\help"));
         keyboardFirstRow.add(new KeyboardButton("\\setup"));
+        keyboardFirstRow.add(new KeyboardButton(lastTown));
         keyboardRowList.add(keyboardFirstRow);
         replyKeyboardMarkup.setKeyboard(keyboardRowList);
     }
 
-    private void setInline(){
+    void setInlineTypeForecast(SendMessage sendMessage) {
         List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
         List<InlineKeyboardButton> buttons1 = new ArrayList<>();
         buttons1.add(new InlineKeyboardButton().setText("Сейчас").setCallbackData("\\current"));
@@ -87,32 +88,9 @@ public class Bot extends TelegramLongPollingBot {
         buttons.add(buttons1);
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         inlineKeyboardMarkup.setKeyboard(buttons);
+
+        sendMessage.setReplyMarkup(inlineKeyboardMarkup);
     }
-
-    private class messageHandle implements Runnable{
-        Message message;
-        public messageHandle(Message message){
-            this.message = message;
-        }
-
-        @Override
-        public void run() {
-            if (message.hasText()) {
-                String messageString = message.getText();
-                    switch (messageString) {
-                        case "\\setup":
-
-
-                    }
-                    String returnWeather = Weather.getWeather(messageString, typeForecast);
-                    sendMsg(message.getChatId().toString(), returnWeather);
-            } else if (message.hasLocation()) {
-                String returnWeather = Weather.getWeather(message.getLocation(), typeForecast);
-                sendMsg(message.getChatId().toString(), returnWeather);
-            }
-        }
-    }
-
 
     public String getBotUsername() {
         return "WeatherPolitexnikBot";
