@@ -149,6 +149,13 @@ public class Weather {
         return hourlyModel.toString();
     }
 
+
+    public static boolean isKnownCity(String cityName){
+        //TODO
+        return true;
+    }
+
+
     //Печать для объекта CurrentWeather
     private static String adaptedPrint(CurrentWeather currentWeather) {
         return String.format(
