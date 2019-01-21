@@ -151,7 +151,7 @@ public class Weather {
 
 
     public static boolean isKnownCity(String cityName){
-        //TODO
+        //TODO Метод определения известного города
         return true;
     }
 
@@ -168,7 +168,7 @@ public class Weather {
     }
 
     //прогноз погоды по дням
-    //TODO
+    //TODO прогноз погоды по дням
     public static String getDailyWeather(String cityName){
         return null;
     }

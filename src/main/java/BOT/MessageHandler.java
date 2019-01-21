@@ -113,7 +113,7 @@ public class MessageHandler implements Runnable {
     }
 
     private String getHelpMessage(){
-        //TODO
+        //TODO Вписать сообщение для HELP
         return "HELP";
     }
 }
