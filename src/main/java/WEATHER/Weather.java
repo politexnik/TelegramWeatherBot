@@ -152,6 +152,7 @@ public class Weather {
 
     public static boolean isKnownCity(String cityName){
         //TODO Метод определения известного города
+        //проверка
         return true;
     }
 
