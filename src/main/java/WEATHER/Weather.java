@@ -103,6 +103,11 @@ public class Weather {
                 + location.getLongitude() + "&units=metric&lang=ru&appid=" +  API_KEY);
     }
 
+    public static boolean isKnownCity(String cityName){
+        //TODO
+        return true;
+    }
+
     //Получение и парсинг JSON ответа по URL (5-ти дневный 3х часовой запрос по геолокации либо по названию города)
     private static String getJSONForeCast(String urlString){
         HourlyModel hourlyModel = new HourlyModel();
