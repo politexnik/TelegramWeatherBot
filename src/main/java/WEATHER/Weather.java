@@ -12,12 +12,10 @@ import org.openweathermap.api.query.*;
 import org.openweathermap.api.query.currentweather.CurrentWeatherOneLocationQuery;
 import org.telegram.telegrambots.meta.api.objects.Location;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -73,7 +71,14 @@ public class Weather {
     }
     //прогноз погоды по часам
     private static String getHourlyWeather(String cityName){
-        return getJSONForeCast("http://api.openweathermap.org/data/2.5/forecast?q=" + cityName +
+        String russianTextEncode = "";
+        try {
+            russianTextEncode = URLEncoder.encode(cityName, "utf-8");   //В случае, если русское название города
+            // из 2х слов без перекодировки не получится
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return getJSONForeCast("http://api.openweathermap.org/data/2.5/forecast?q=" + russianTextEncode +
                 ",RU&units=metric&lang=ru&appid=" +  API_KEY);
     }
 
@@ -112,6 +117,13 @@ public class Weather {
 
         //Парсим JSON из API из OpenWeatherMap (см package.json)
         JSONObject jObject = new JSONObject(stringBuilder.toString());
+
+        String codeResult = jObject.getString("cod");
+        //Если не найден город
+        if (codeResult.equals("404")) {
+            return "Город не найден";
+        }
+
         JSONObject jCity = jObject.getJSONObject("city");
         hourlyModel = new HourlyModel();
         hourlyModel.setCityName(jCity.getString("name"));
@@ -148,15 +160,6 @@ public class Weather {
     }
         return hourlyModel.toString();
     }
-
-
-    public static boolean isKnownCity(String cityName){
-        //TODO Метод определения известного города
-        //проверка1
-
-        return true;
-    }
-
 
     //Печать для объекта CurrentWeather
     private static String adaptedPrint(CurrentWeather currentWeather) {

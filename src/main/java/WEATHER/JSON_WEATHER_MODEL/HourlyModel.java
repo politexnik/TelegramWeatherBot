@@ -21,6 +21,20 @@ public class HourlyModel {
         return stringBuilder.toString();
     }
 
+    public String toStringDaily(){
+        //TODO
+        StringBuilder stringBuilder = new StringBuilder().append("Прогноз на каждые 3 часа:\n")
+                .append("Город: " + cityName + "\n");
+
+        for (int i = 0; i < weatherPointList.size(); i++) {
+            //if ()
+        }
+
+
+        return stringBuilder.toString();
+
+    }
+
     public String getCityName() {
         return cityName;
     }
