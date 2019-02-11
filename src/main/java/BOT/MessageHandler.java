@@ -113,7 +113,8 @@ public class MessageHandler implements Runnable {
     }
 
     private String getHelpMessage(){
-        //TODO Вписать сообщение для HELP
-        return "HELP";
+        return "HELP message:" +
+                "Здравствуй! Я предоставляю прогноз погоды по городам и геолокации. Набери название города или отправь" +
+                "геолокацию - и я предоставлю прогноз";
     }
 }

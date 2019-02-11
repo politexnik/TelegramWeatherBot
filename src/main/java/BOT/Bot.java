@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Bot extends TelegramLongPollingBot {
-    TypeForecast typeForecast = TypeForecast.CURRENT;
+    TypeForecast typeForecast = TypeForecast.CURRENT;   //TODO переписать логику разного прогноза на каждого пользователя
     String lastTown;
 
     //Мапа для установки типа погоды

@@ -21,6 +21,21 @@ public class HourlyModel {
         return stringBuilder.toString();
     }
 
+    //печать прогноза по дням
+    public String toStringDaily(){
+        StringBuilder stringBuilder = new StringBuilder().append("Прогноз на каждые 3 часа:\n")
+                .append("Город: " + cityName + "\n");
+
+        for (int i = 0; i < weatherPointList.size(); i++) { //ищем точки с временем 15:00
+            WeatherPoint wp = weatherPointList.get(i);
+            if (wp.getDate().getHours() == 15) {
+                stringBuilder.append(wp.toString() + "\n");
+            }
+        }
+        return stringBuilder.toString();
+
+    }
+
     public String getCityName() {
         return cityName;
     }
