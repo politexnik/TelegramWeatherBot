@@ -73,7 +73,7 @@ public class Weather {
     //прогноз погоды по часам
     private static String getHourlyWeather(String cityName) {
         return getJSONForeCast("http://api.openweathermap.org/data/2.5/forecast?q=" + encodeCityName(cityName) +
-                ",RU&units=metric&lang=ru&appid=" + API_KEY);
+                ",RU&units=metric&lang=ru&appid=" + API_KEY, TypeForecast.HOURLY);
     }
 
     private static String getCurrentWeather(Location location) {
@@ -92,7 +92,7 @@ public class Weather {
 
     private static String getHourlyWeather(Location location) {
         return getJSONForeCast("http://api.openweathermap.org/data/2.5/forecast?lat=" + location.getLatitude() + "&lon="
-                + location.getLongitude() + "&units=metric&lang=ru&appid=" + API_KEY);
+                + location.getLongitude() + "&units=metric&lang=ru&appid=" + API_KEY, TypeForecast.HOURLY);
     }
 
     public static boolean isKnownCity(String cityName) {
@@ -110,7 +110,7 @@ public class Weather {
     }
 
     //Получение и парсинг JSON ответа по URL (5-ти дневный 3х часовой запрос по геолокации либо по названию города)
-    private static String getJSONForeCast(String urlString) {
+    private static String getJSONForeCast(String urlString, TypeForecast typeForecast) {
         HourlyModel hourlyModel = new HourlyModel();
         JSONObject jObject = null;
         try {
@@ -150,7 +150,7 @@ public class Weather {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        return hourlyModel.toString();
+        return typeForecast == TypeForecast.HOURLY ? hourlyModel.toString() : hourlyModel.toStringDaily();
     }
 
 
@@ -166,14 +166,14 @@ public class Weather {
     }
 
     //прогноз погоды по дням
-    //TODO прогноз погоды по дням
     private static String getDailyWeather(String cityName) {
-        return null;
+        return getJSONForeCast("http://api.openweathermap.org/data/2.5/forecast?q=" + encodeCityName(cityName) +
+                ",RU&units=metric&lang=ru&appid=" + API_KEY, TypeForecast.DAILY);
     }
 
-    //TODO
     private static String getDailyWeather(Location location) {
-        return null;
+        return getJSONForeCast("http://api.openweathermap.org/data/2.5/forecast?lat=" + location.getLatitude() + "&lon="
+                + location.getLongitude() + "&units=metric&lang=ru&appid=" + API_KEY, TypeForecast.DAILY);
     }
 
     private static JSONObject getJSONFromUrl(String urlString){

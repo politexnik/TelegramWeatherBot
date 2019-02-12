@@ -8,6 +8,7 @@ import org.telegram.telegrambots.meta.api.objects.User;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Timer;
 
 public class MessageHandler implements Runnable {
     Bot bot;
@@ -84,7 +85,10 @@ public class MessageHandler implements Runnable {
                                             userID, messageString));
                                     //обнуляем последний вопрос пользователю
                                     setUserIDLastQuestion(userID,"");
-                                    new Thread(new SubscriptionHandler()).start();  //запуск потоков обработки подписок
+                                    //запуск потоков обработки подписок
+                                    SubscriptionHandler subscriptionHandler = new SubscriptionHandler(bot, sendMessage, inMessage.getChatId().toString(), messageString);
+                                    Timer timer = new Timer(false);
+                                    timer.scheduleAtFixedRate(subscriptionHandler, 0, 24*60*60*1000);
                                     outString = "Оформление подписки";
                                 } else
                                     outString = "Город неизвестен. Введите еще раз или наберите \\cancel";
@@ -118,3 +122,5 @@ public class MessageHandler implements Runnable {
                 "геолокацию - и я предоставлю прогноз";
     }
 }
+
+//TODO Протестировать работу подписки
