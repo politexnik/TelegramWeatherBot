@@ -13,8 +13,11 @@ import org.openweathermap.api.query.currentweather.CurrentWeatherOneLocationQuer
 import org.telegram.telegrambots.meta.api.objects.Location;
 
 import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -89,30 +92,25 @@ public class Weather {
         return adaptedPrint(currentWeather);
     }
 
-
     private static String getHourlyWeather(Location location) {
         return getJSONForeCast("http://api.openweathermap.org/data/2.5/forecast?lat=" + location.getLatitude() + "&lon="
                 + location.getLongitude() + "&units=metric&lang=ru&appid=" + API_KEY, TypeForecast.HOURLY);
     }
 
     public static boolean isKnownCity(String cityName) {
-        String russianTextEncode = "";
-        try {
-            russianTextEncode = URLEncoder.encode(cityName, "utf-8");   //В случае, если русское название города
+        String russianTextEncode;
+        russianTextEncode = URLEncoder.encode(cityName, StandardCharsets.UTF_8);   //В случае, если русское название города
             // из 2х слов без перекодировки не получится
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
         String urlString = "http://api.openweathermap.org/data/2.5/forecast?q=" + russianTextEncode +
                 ",RU&units=metric&lang=ru&appid=" + API_KEY;
 
-        return (getJSONFromUrl(urlString) == null); //если вернулся null - город неизвестен
+        return (getJSONFromUrl(urlString) != null); //если вернулся null - город неизвестен
     }
 
     //Получение и парсинг JSON ответа по URL (5-ти дневный 3х часовой запрос по геолокации либо по названию города)
     private static String getJSONForeCast(String urlString, TypeForecast typeForecast) {
         HourlyModel hourlyModel = new HourlyModel();
-        JSONObject jObject = null;
+        JSONObject jObject;
         try {
             //Парсим JSON из API из OpenWeatherMap (см package.json).
             jObject = getJSONFromUrl(urlString);
@@ -182,7 +180,12 @@ public class Weather {
         try {
             //читаем из URL JSON объект
             URL url = new URL(urlString);
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader((InputStream) url.getContent()));
+            URLConnection urlConnection = url.openConnection();
+            if (((HttpURLConnection)urlConnection).getResponseCode() == 404) {
+                return null;    //если город не найден
+            }
+            InputStream urlInputStream = urlConnection.getInputStream();
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlInputStream));
             StringBuilder stringBuilder = new StringBuilder();
             while (bufferedReader.ready()) {
                 stringBuilder.append(bufferedReader.readLine());
@@ -190,11 +193,11 @@ public class Weather {
             //Парсим JSON из API из OpenWeatherMap (см package.json)
             jObject = new JSONObject(stringBuilder.toString());
 
-            String codeResult = jObject.getString("cod");
-            //Если не найден город
-            if (codeResult.equals("404")) {
-                return null;
-            }
+//            String codeResult = jObject.getString("cod");
+//            //Если не найден город
+//            if (codeResult.equals("404")) {
+//                return null;
+//            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -202,13 +205,9 @@ public class Weather {
     }
 
     private static String encodeCityName(String cityName){
-        String russianTextEncode = "";
-        try {
-            russianTextEncode = URLEncoder.encode(cityName, "utf-8");   //В случае, если русское название города
+        String russianTextEncode;
+        russianTextEncode = URLEncoder.encode(cityName, StandardCharsets.UTF_8);   //В случае, если русское название города
             // из 2х слов без перекодировки не получится
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
         return russianTextEncode;
     }
 }
